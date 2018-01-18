@@ -1,0 +1,15 @@
+language: csharp
+solution: xmr-stak-bootstrap.sln
+
+before_deploy:
+- cd ./xmr-stak-bootstrap/bin/Release/
+- zip -r release.$TRAVIS_BUILD_NUMBER.zip .
+
+deploy:
+  provider: releases
+  api_key:
+    secure: u55u3/sgKNDgf74VMV3dTnEY9KI+u27TziRszC+Tqji8izN9F1nGsjsumsUmPFd15tSsmhemn7YwVokv+WDjzCTdnKBSMuM8ie7uk29XWTbatVHVLturKrG0GqkJbL65DTPgSRYff67Ze77IpPS7jm+gL1KUFlJdN8oocOe3OnUT/nJTEqShld/n7kYmh+13WeSCzXX/dbyr7IyE9IVXEB4YNFuudbEHzuqLR8FphzPSW/8o1WnMmXKUb9CSed30WZoB4R8luOgexd6g+0VdudkVsN3nmO90E2wmZKNpy8Y3MA0GnuU/PNH7N3m/J7RwjLNMpTfuahYshFg1SXdXHJkoHGSUddvDrboEK28beb9asjdyAVce6TjXRUIlPQMjhu6XOXegXyZ2Tlago3aRGmjCjHtVL9+0Ls15Q2va1kRtXub2JYfnGmDeozVNb+Wav6tEVvhuewYv2GSURK4EBHZ6N4FKaHKwFmY+tC3Ggm2/f354ShCC08LizPHH4R7ZqWSNnL+WTcs49I8M3FU8BQ/q8UUHcTqJK4q28mzH2+8uBeOawNE+cOzKfzLsk/Meu0b68tSV172AWsTXvUzT7oJ5JrbNieg0JE6WFfQqaiEIwsOMmt+DXoLuCcHktJAIWMm0Z8/TWRT49F35igThC/UorMVFsW5ki6zO+/rsfpc=
+  file: "release.${TRAVIS_BUILD_NUMBER}.zip"
+  skip_cleanup: true
+  on:
+    tags: true
