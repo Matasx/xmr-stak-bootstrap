@@ -1,0 +1,12 @@
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
+namespace XmrStakBootstrap.MasterConfiguration.Model
+{
+    [DataContract]
+    public class InstanceConfiguration
+    {
+        [DataMember(Name = "instance_profiles", EmitDefaultValue = true, IsRequired = true, Order = 10)]
+        public IDictionary<string, InstanceEntry> InstanceProfiles { get; set; }
+    }
+}

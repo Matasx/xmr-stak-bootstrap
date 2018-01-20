@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Linq;
 using Unity;
 using Unity.Attributes;
-using Unity.Lifetime;
+using XmrStakBootstrap.Core.Runner;
 
-namespace xmr_stak_bootstrap
+namespace XmrStakBootstrap
 {
     internal class Program
     {
@@ -12,17 +11,10 @@ namespace xmr_stak_bootstrap
         {
             try
             {
-                //todo: register loaded configuration and arguments to unity, use as a dependency everywhere
-
-                new UnityContainer()
-
-                    .RegisterType<IConfigurationParser, ConfigurationParser>()
-                    .RegisterType<IRunner, Runner>()
-                    .RegisterType<ISampleConfigurationGenerator, SampleConfigurationGenerator>()
-                    .RegisterType<IFinalizer, Finalizer>(new ContainerControlledLifetimeManager())
-
+                ProgramBootstrapper
+                    .RegisterGlobalContainer(new UnityContainer(), args)
                     .Resolve<Program>()
-                    .Run(args);
+                    .Run();
             }
             catch (Exception e)
             {
@@ -32,36 +24,25 @@ namespace xmr_stak_bootstrap
         }
 
         [Dependency]
-        public IConfigurationParser ConfigurationParser { get; set; }
+        public RunConfiguration.Model.RunConfigurationModel ConfigurationModel { get; set; }
 
         [Dependency]
-        public IRunner Runner { get; set; }
+        public IUnityContainer UnityContainer { get; set; }
 
-        [Dependency]
-        public IFinalizer Finalizer { get; set; }
-
-        public void Run(string[] args)
+        public void Run()
         {
-            var config = ConfigurationParser.Parse(args);
-            if (config.Errors.Any()) return;
+            if (ConfigurationModel == null) return;
 
             while (true)
             {
-                try
+                using (var container = UnityContainer.CreateChildContainer())
                 {
-                    Runner.Run(config.Value);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(@"Unexpected error occured during runtime: ");
-                    Console.WriteLine(e);
-                }
-                finally
-                {
-                    Finalizer.DoFinalize();
+                    ProgramBootstrapper.RegisterRunnerContainer(container);
+                    var context = container.Resolve<IRunnerContext>();
+                    context.Execute();
                 }
 
-                if (!config.Value.ContinuousMode) break;
+                if (!ConfigurationModel.ContinuousMode) break;
             }
         }
     }

@@ -7,7 +7,7 @@
     <ProjectGuid>{756D3D3F-FBDB-4CCA-8C73-62A22F615526}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>xmr_stak_bootstrap</RootNamespace>
+    <RootNamespace>XmrStakBootstrap</RootNamespace>
     <AssemblyName>xmr-stak-bootstrap</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -84,50 +84,58 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationParser.cs" />
-    <Compile Include="DictionaryExtensions.cs" />
-    <Compile Include="Finalizer.cs" />
-    <Compile Include="IConfigurationParser.cs" />
-    <Compile Include="IFinalizer.cs" />
-    <Compile Include="IRunner.cs" />
-    <Compile Include="ISampleConfigurationGenerator.cs" />
-    <Compile Include="Model\AffinityConverter.cs" />
-    <Compile Include="Model\AmdConfiguration.cs" />
-    <Compile Include="Model\AmdThreadEntry.cs" />
-    <Compile Include="Model\CpuConfiguration.cs" />
-    <Compile Include="Model\CpuThreadEntry.cs" />
-    <Compile Include="Model\InstanceConfiguration.cs" />
-    <Compile Include="Model\InstanceEntry.cs" />
-    <Compile Include="Model\MasterConfiguration.cs" />
-    <Compile Include="Model\NvidiaConfiguration.cs" />
-    <Compile Include="Model\NvidiaThreadEntry.cs" />
-    <Compile Include="Model\PoolConfiguration.cs" />
-    <Compile Include="Model\PoolEntry.cs" />
-    <Compile Include="Model\PrioritizedPoolEntry.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Core\Runner\Generator\ConfigurationGeneratorRunner.cs" />
+    <Compile Include="MasterConfiguration\IMasterConfigurationParser.cs" />
+    <Compile Include="Core\Runner\IRunnerContext.cs" />
+    <Compile Include="MasterConfiguration\MasterConfigurationParser.cs" />
+    <Compile Include="ProgramBootstrapper.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RunConfiguration.cs" />
-    <Compile Include="Model\SampleConfigurationData.cs" />
-    <Compile Include="Model\SolutionConfiguration.cs" />
-    <Compile Include="Runner.cs" />
-    <Compile Include="SampleConfigurationGenerator.cs" />
+    <Compile Include="RunConfiguration\RunConfigurationParser.cs" />
+    <Compile Include="Common\DictionaryExtensions.cs" />
+    <Compile Include="Core\Finalizer.cs" />
+    <Compile Include="RunConfiguration\IRunConfigurationParser.cs" />
+    <Compile Include="Core\IFinalizer.cs" />
+    <Compile Include="Core\Runner\IRunner.cs" />
+    <Compile Include="Core\Runner\Generator\ISampleConfigurationGenerator.cs" />
+    <Compile Include="MasterConfiguration\Model\AffinityConverter.cs" />
+    <Compile Include="MasterConfiguration\Model\AmdConfiguration.cs" />
+    <Compile Include="MasterConfiguration\Model\AmdThreadEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\CpuConfiguration.cs" />
+    <Compile Include="MasterConfiguration\Model\CpuThreadEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\InstanceConfiguration.cs" />
+    <Compile Include="MasterConfiguration\Model\InstanceEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\MasterConfigurationModel.cs" />
+    <Compile Include="MasterConfiguration\Model\NvidiaConfiguration.cs" />
+    <Compile Include="MasterConfiguration\Model\NvidiaThreadEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\PoolConfiguration.cs" />
+    <Compile Include="MasterConfiguration\Model\PoolEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\PrioritizedPoolEntry.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunConfiguration\Model\RunConfigurationModel.cs" />
+    <Compile Include="MasterConfiguration\Model\SampleConfigurationData.cs" />
+    <Compile Include="MasterConfiguration\Model\SolutionConfiguration.cs" />
+    <Compile Include="Core\Runner\Miner\MinerRunner.cs" />
+    <Compile Include="Core\Runner\RunnerContext.cs" />
+    <Compile Include="Core\Runner\RunnerInjectionFactory.cs" />
+    <Compile Include="Core\Runner\Generator\SampleConfigurationGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="amd.source.txt" />
-    <None Include="config.source.txt" />
-    <None Include="cpu.source.txt" />
-    <None Include="nvidia.source.txt" />
+    <None Include="MasterConfiguration\Templates\amd.source.txt" />
+    <None Include="MasterConfiguration\Templates\config.source.txt" />
+    <None Include="MasterConfiguration\Templates\cpu.source.txt" />
+    <None Include="MasterConfiguration\Templates\nvidia.source.txt" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
