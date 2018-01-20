@@ -2,6 +2,7 @@
 using Unity;
 using Unity.Attributes;
 using XmrStakBootstrap.Core.Runner;
+using XmrStakBootstrap.RunConfiguration.Model;
 
 namespace XmrStakBootstrap
 {
@@ -18,13 +19,13 @@ namespace XmrStakBootstrap
             }
             catch (Exception e)
             {
-                Console.WriteLine(@"Unexpected error occured during initialization: ");
+                Console.WriteLine(@"Unexpected error occured: ");
                 Console.WriteLine(e);
             }
         }
 
         [Dependency]
-        public RunConfiguration.Model.RunConfigurationModel ConfigurationModel { get; set; }
+        public RunConfigurationModel ConfigurationModel { get; set; }
 
         [Dependency]
         public IUnityContainer UnityContainer { get; set; }

@@ -9,11 +9,11 @@ namespace XmrStakBootstrap.Core.Runner.Generator
         public ISampleConfigurationGenerator SampleConfigurationGenerator { get; set; }
 
         [Dependency]
-        public RunConfigurationModel ConfigurationModel { get; set; }
+        public RunConfigurationModel RunConfiguration { get; set; }
 
         public void Run()
         {
-            SampleConfigurationGenerator.Generate(ConfigurationModel.MasterConfiguration);
+            SampleConfigurationGenerator.Generate(RunConfiguration.GenerateConfiguration);
         }
     }
 }

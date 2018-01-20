@@ -19,10 +19,6 @@ namespace XmrStakBootstrap
             return unityContainer
                 .RegisterType<RunConfigurationModel>(new ContainerControlledLifetimeManager(), new InjectionFactory(container => ParseRunConfiguration(container, args)))
                 .RegisterType<IRunConfigurationParser, RunConfigurationParser>()
-                .RegisterType<IMasterConfigurationParser, MasterConfigurationParser>()
-                .RegisterType<IRunner>(new RunnerInjectionFactory())
-                .RegisterType<ISampleConfigurationGenerator, SampleConfigurationGenerator>()
-                .RegisterType<IFinalizer, Finalizer>(new ContainerControlledLifetimeManager())
                 ;
         }
 
@@ -31,6 +27,10 @@ namespace XmrStakBootstrap
             return unityContainer
                 .RegisterType<MasterConfigurationModel>(new ContainerControlledLifetimeManager(), new InjectionFactory(LoadMasterConfiguration))
                 .RegisterType<IRunnerContext, RunnerContext>()
+                .RegisterType<IMasterConfigurationParser, MasterConfigurationParser>()
+                .RegisterType<IRunner>(new RunnerInjectionFactory())
+                .RegisterType<ISampleConfigurationGenerator, SampleConfigurationGenerator>()
+                .RegisterType<IFinalizer, Finalizer>(new ContainerControlledLifetimeManager())
                 ;
         }
 

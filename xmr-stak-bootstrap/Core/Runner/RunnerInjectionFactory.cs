@@ -24,14 +24,14 @@ namespace XmrStakBootstrap.Core.Runner
         private class RunnerFactory
         {
             [Dependency]
-            public RunConfigurationModel ConfigurationModel { get; set; }
+            public RunConfigurationModel RunConfiguration { get; set; }
 
             [Dependency]
             public IUnityContainer UnityContainer { get; set; }
 
             public IRunner CreateRunner()
             {
-                if (ConfigurationModel.GenerateConfigurationOnly)
+                if (RunConfiguration.GenerateConfigurationOnly)
                 {
                     return UnityContainer.Resolve<ConfigurationGeneratorRunner>();
                 }

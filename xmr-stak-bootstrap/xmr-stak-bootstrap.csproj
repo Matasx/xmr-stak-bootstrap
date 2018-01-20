@@ -88,6 +88,12 @@
     <Compile Include="MasterConfiguration\IMasterConfigurationParser.cs" />
     <Compile Include="Core\Runner\IRunnerContext.cs" />
     <Compile Include="MasterConfiguration\MasterConfigurationParser.cs" />
+    <Compile Include="MasterConfiguration\Model\HardwareEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\HardwareTypeConverter.cs" />
+    <Compile Include="MasterConfiguration\Model\IndexedAmdThreadEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\IndexedNvidiaThreadEntry.cs" />
+    <Compile Include="MasterConfiguration\Model\PathsConfiguration.cs" />
+    <Compile Include="MasterConfiguration\Model\SolutionEntry.cs" />
     <Compile Include="ProgramBootstrapper.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -102,23 +108,16 @@
     <Compile Include="Core\Runner\IRunner.cs" />
     <Compile Include="Core\Runner\Generator\ISampleConfigurationGenerator.cs" />
     <Compile Include="MasterConfiguration\Model\AffinityConverter.cs" />
-    <Compile Include="MasterConfiguration\Model\AmdConfiguration.cs" />
     <Compile Include="MasterConfiguration\Model\AmdThreadEntry.cs" />
-    <Compile Include="MasterConfiguration\Model\CpuConfiguration.cs" />
     <Compile Include="MasterConfiguration\Model\CpuThreadEntry.cs" />
-    <Compile Include="MasterConfiguration\Model\InstanceConfiguration.cs" />
-    <Compile Include="MasterConfiguration\Model\InstanceEntry.cs" />
     <Compile Include="MasterConfiguration\Model\MasterConfigurationModel.cs" />
-    <Compile Include="MasterConfiguration\Model\NvidiaConfiguration.cs" />
     <Compile Include="MasterConfiguration\Model\NvidiaThreadEntry.cs" />
-    <Compile Include="MasterConfiguration\Model\PoolConfiguration.cs" />
     <Compile Include="MasterConfiguration\Model\PoolEntry.cs" />
     <Compile Include="MasterConfiguration\Model\PrioritizedPoolEntry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunConfiguration\Model\RunConfigurationModel.cs" />
     <Compile Include="MasterConfiguration\Model\SampleConfigurationData.cs" />
-    <Compile Include="MasterConfiguration\Model\SolutionConfiguration.cs" />
     <Compile Include="Core\Runner\Miner\MinerRunner.cs" />
     <Compile Include="Core\Runner\RunnerContext.cs" />
     <Compile Include="Core\Runner\RunnerInjectionFactory.cs" />

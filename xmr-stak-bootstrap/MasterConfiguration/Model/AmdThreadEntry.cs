@@ -6,9 +6,6 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
     [DataContract]
     public class AmdThreadEntry
     {
-        [DataMember(Name = "index", EmitDefaultValue = true, IsRequired = true, Order = 10)]
-        public int Index { get; set; }
-
         [DataMember(Name = "affine_to_cpu", EmitDefaultValue = true, IsRequired = true, Order = 20)]
         [JsonConverter(typeof(AffinityConverter))]
         public object AffineToCpu { get; set; }

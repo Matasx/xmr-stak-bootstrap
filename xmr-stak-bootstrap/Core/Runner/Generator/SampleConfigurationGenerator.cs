@@ -13,10 +13,10 @@ namespace XmrStakBootstrap.Core.Runner.Generator
             var configuration = SampleConfigurationData.MasterConfigurationModel;
             var contents = JsonConvert.SerializeObject(configuration, Formatting.Indented);
             WriteAllText(path, contents);
-            WriteAllText(configuration.ConfigTemplate, Resources.config_source);
-            WriteAllText(configuration.CpuTemplate, Resources.cpu_source);
-            WriteAllText(configuration.NvidiaTemplate, Resources.nvidia_source);
-            WriteAllText(configuration.AmdTemplate, Resources.amd_source);
+            WriteAllText(configuration.PathsConfiguration.ConfigTemplate, Resources.config_source);
+            WriteAllText(configuration.PathsConfiguration.CpuTemplate, Resources.cpu_source);
+            WriteAllText(configuration.PathsConfiguration.NvidiaTemplate, Resources.nvidia_source);
+            WriteAllText(configuration.PathsConfiguration.AmdTemplate, Resources.amd_source);
         }
 
         private static void WriteAllText(string path, string content)

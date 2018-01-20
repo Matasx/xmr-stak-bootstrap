@@ -4,70 +4,45 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
 {
     public static class SampleConfigurationData
     {
-        public static List<PrioritizedPoolEntry> PrioritizedPoolEntries => new List<PrioritizedPoolEntry>
+        public static IDictionary<string, PoolEntry> Pools => new Dictionary<string, PoolEntry>
         {
-            new PrioritizedPoolEntry
             {
-                PoolAddress = "pool.address.tld:1234",
-                PoolPassword = "x",
-                PoolWeight = 1,
-                TlsFingerprint = string.Empty,
-                UseNiceHash = false,
-                UseTls = false,
-                WalletAddress = "your_wallet_address"
-            }
-        };
-
-        public static PoolConfiguration PoolConfiguration => new PoolConfiguration
-        {
-            Pools = new Dictionary<string, PoolEntry>
-            {
+                "ETN", new PoolEntry
                 {
-                    "ETN", new PoolEntry
-                    {
-                        PoolAddress = "pool.etn.spacepools.org:7777"
-                    }
-                },
-                {
-                    "DCY", new PoolEntry
-                    {
-                        PoolAddress = "poolmining1.dinastycoin.com:5555"
-                    }
-                },
-                {
-                    "SUMO", new PoolEntry
-                    {
-                        PoolAddress = "sumopool.sonofatech.com:3333"
-                    }
+                    PoolAddress = "pool.etn.spacepools.org:7777"
                 }
             },
-            PoolSets = new Dictionary<string, IList<string>>
             {
-                {"Electroneum", new List<string> {"ETN", "DCY", "SUMO" } },
-                {"Dinastycoin", new List<string> {"DCY", "ETN", "SUMO" } },
-                {"Sumokoin", new List<string> {"SUMO", "ETN", "DCY" } }
+                "DCY", new PoolEntry
+                {
+                    PoolAddress = "poolmining1.dinastycoin.com:5555"
+                }
+            },
+            {
+                "SUMO", new PoolEntry
+                {
+                    PoolAddress = "sumopool.sonofatech.com:3333"
+                }
             }
         };
 
-        public static CpuConfiguration CpuConfiguration => new CpuConfiguration
-        {
-            Profiles = new Dictionary<string, IList<CpuThreadEntry>>
+        public static IDictionary<string, IList<CpuThreadEntry>> CpuProfiles
+            => new Dictionary<string, IList<CpuThreadEntry>>
             {
-                {"No", null},
                 {
-                    "Low power @ 0", new List<CpuThreadEntry>
+                    "Slow single", new List<CpuThreadEntry>
                     {
                         new CpuThreadEntry {AffineToCpu = 0, LowPowerMode = true}
                     }
                 },
                 {
-                    "Low power @ any", new List<CpuThreadEntry>
+                    "Slow any", new List<CpuThreadEntry>
                     {
                         new CpuThreadEntry {AffineToCpu = false, LowPowerMode = true}
                     }
                 },
                 {
-                    "All cores", new List<CpuThreadEntry>
+                    "Fast", new List<CpuThreadEntry>
                     {
                         new CpuThreadEntry {AffineToCpu = 0, LowPowerMode = false},
                         new CpuThreadEntry {AffineToCpu = 1, LowPowerMode = false},
@@ -75,33 +50,16 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
                         new CpuThreadEntry {AffineToCpu = 3, LowPowerMode = false}
                     }
                 }
-            }
-        };
+            };
 
-        public static NvidiaConfiguration NvidiaConfiguration => new NvidiaConfiguration
-        {
-            Profiles = new Dictionary<string, IList<NvidiaThreadEntry>>
+        public static IDictionary<string, IList<NvidiaThreadEntry>> NvidiaProfiles
+            => new Dictionary<string, IList<NvidiaThreadEntry>>
             {
                 {
-                    "GeForce GTX 1060 UI", new List<NvidiaThreadEntry>
+                    "Slow", new List<NvidiaThreadEntry>
                     {
                         new NvidiaThreadEntry
                         {
-                            Index = 0,
-                            Blocks = 20,
-                            Threads = 60,
-                            Bsleep = 50,
-                            Bfactor = 14,
-                            AffineToCpu = 2
-                        }
-                    }
-                },
-                {
-                    "NVidia 750 Ti fast", new List<NvidiaThreadEntry>
-                    {
-                        new NvidiaThreadEntry
-                        {
-                            Index = 1,
                             Blocks = 5,
                             Threads = 50,
                             Bsleep = 5,
@@ -109,96 +67,129 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
                             AffineToCpu = 1
                         }
                     }
+                },
+                {
+                    "Fast", new List<NvidiaThreadEntry>
+                    {
+                        new NvidiaThreadEntry
+                        {
+                            Blocks = 20,
+                            Threads = 60,
+                            Bsleep = 50,
+                            Bfactor = 14,
+                            AffineToCpu = 2
+                        }
+                    }
                 }
+            };
+
+        public static IDictionary<string, IList<AmdThreadEntry>> Amdprofiles
+            => new Dictionary<string, IList<AmdThreadEntry>>
+            {
+                {
+                    "Slow", new List<AmdThreadEntry>
+                    {
+                        new AmdThreadEntry {Intensity = 100}
+                    }
+                },
+                {
+                    "Fast", new List<AmdThreadEntry>
+                    {
+                        new AmdThreadEntry(),
+                        new AmdThreadEntry {Intensity = 300}
+                    }
+                }
+            };
+
+        public static IDictionary<string, HardwareEntry> Hardware => new Dictionary<string, HardwareEntry>
+        {
+            {
+                "CPU", new HardwareEntry {Type = "cpu"}
+            },
+            {
+                "nVidia 1060", new HardwareEntry {Type = "nvidia"}
+            },
+            {
+                "nVidia 750 Ti", new HardwareEntry {Type = "nvidia", Index = 1}
+            },
+            {
+                "AMD Rx 470", new HardwareEntry {Type = "amd"}
             }
         };
 
-        public static AmdConfiguration AmdConfiguration => new AmdConfiguration
-        {
-            Profiles = new Dictionary<string, IList<AmdThreadEntry>>
+        public static IDictionary<string, IDictionary<string, string>> WorkloadProfiles
+            => new Dictionary<string, IDictionary<string, string>>
             {
                 {
-                    "Radeon fast", new List<AmdThreadEntry>
+                    "Low performance", new Dictionary<string, string>
                     {
-                        new AmdThreadEntry {Index = 0},
-                        new AmdThreadEntry {Index = 1}
+                        {"CPU", "Slow single"},
+                        {"nVidia 1060", "Slow"},
+                        {"nVidia 750 Ti", "Slow"},
+                        {"AMD Rx 470", "Slow"}
+                    }
+                },
+                {
+                    "Max performance", new Dictionary<string, string>
+                    {
+                        {"CPU", "Fast"},
+                        {"nVidia 1060", "Fast"},
+                        {"nVidia 750 Ti", "Fast"},
+                        {"AMD Rx 470", "Fast"}
                     }
                 }
-            }
-        };
+            };
 
-        public static InstanceConfiguration InstanceConfiguration => new InstanceConfiguration
-        {
-            InstanceProfiles = new Dictionary<string, InstanceEntry>
+        public static IDictionary<string, IList<SolutionEntry>> SolutionProfiles
+            => new Dictionary<string, IList<SolutionEntry>>
             {
                 {
-                    "CPU low power @ 0",
-                    new InstanceEntry
+                    "SUMO CPU", new List<SolutionEntry>
                     {
-                        CpuProfile = "Low power @ 0"
+                        new SolutionEntry
+                        {
+                            Pools = new List<string> {"SUMO","DCY","ETN"},
+                            Hardware = new List<string> {"CPU"}
+                        }
                     }
                 },
                 {
-                    "NVidia 750 Ti",
-                    new InstanceEntry
+                    "ETN+DCY", new List<SolutionEntry>
                     {
-                        NvidiaProfiles = new List<string> { "NVidia 750 Ti fast" }
+                        new SolutionEntry
+                        {
+                            Pools = new List<string> {"ETN", "SUMO"},
+                            Hardware = new List<string> {"CPU", "nVidia 1060"}
+                        },
+                        new SolutionEntry
+                        {
+                            Pools = new List<string> {"DCY", "SUMO"},
+                            Hardware = new List<string> {"nVidia 750 Ti", "AMD Rx 470"}
+                        }
                     }
                 },
                 {
-                    "NVidia 750 + 1060",
-                    new InstanceEntry
+                    "DCY All", new List<SolutionEntry>
                     {
-                        NvidiaProfiles = new List<string> { "NVidia 750 Ti fast", "GeForce GTX 1060 UI" }
-                    }
-                },
-                {
-                    "All fast",
-                    new InstanceEntry
-                    {
-                        CpuProfile = "All cores",
-                        NvidiaProfiles = new List<string> { "NVidia 750 Ti fast", "GeForce GTX 1060 UI" }
-                    }
-                },
-                {
-                    "Amd",
-                    new InstanceEntry
-                    {
-                        CpuProfile = "All cores",
-                        AmdProfiles = new List<string> { "Radeon fast" }
-                    }
-                },
-            }
-        };
-
-        public static SolutionConfiguration SolutionConfiguration => new SolutionConfiguration
-        {
-            SolutionProfiles = new Dictionary<string, IDictionary<string, IList<string>>>
-            {
-                {
-                    "ETN CPU + SUMO GK", new Dictionary<string, IList<string>>
-                    {
-                        {"Electroneum", new List<string> {"CPU low power @ 0"}},
-                        {"Sumokoin", new List<string> {"NVidia 750 + 1060"}}
-                    }
-                },
-                {
-                    "DCY All", new Dictionary<string, IList<string>>
-                    {
-                        {"Dinastycoin", new List<string> {"All fast"}}
+                        new SolutionEntry
+                        {
+                            Pools = new List<string> {"DCY", "SUMO"},
+                            Hardware = new List<string> {"CPU", "nVidia 1060", "nVidia 750 Ti", "AMD Rx 470"}
+                        }
                     }
                 }
-            }
-        };
+            };
 
         public static MasterConfigurationModel MasterConfigurationModel => new MasterConfigurationModel
         {
-            PoolConfiguration = PoolConfiguration,
-            CpuConfiguration = CpuConfiguration,
-            NvidiaConfiguration = NvidiaConfiguration,
-            AmdConfiguration = AmdConfiguration,
-            InstanceConfiguration = InstanceConfiguration,
-            SolutionConfiguration = SolutionConfiguration
+            Pools = Pools,
+            CpuProfiles = CpuProfiles,
+            NvidiaProfiles = NvidiaProfiles,
+            AmdProfiles = Amdprofiles,
+            Hardware = Hardware,
+            WorkloadProfiles = WorkloadProfiles,
+            SolutionProfiles = SolutionProfiles,
+            PathsConfiguration = new PathsConfiguration()
         };
     }
 }

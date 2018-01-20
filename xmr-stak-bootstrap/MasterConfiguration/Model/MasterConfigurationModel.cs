@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace XmrStakBootstrap.MasterConfiguration.Model
@@ -5,42 +6,28 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
     [DataContract]
     public class MasterConfigurationModel
     {
-        [DataMember(Name = "config_template_path", EmitDefaultValue = true, IsRequired = true, Order = 10)]
-        public string ConfigTemplate { get; set; }
+        [DataMember(Name = "paths", EmitDefaultValue = true, IsRequired = true, Order = 10)]
+        public PathsConfiguration PathsConfiguration { get; set; }
 
-        [DataMember(Name = "nvidia_template_path", EmitDefaultValue = true, IsRequired = true, Order = 20)]
-        public string NvidiaTemplate { get; set; }
+        [DataMember(Name = "pools", EmitDefaultValue = true, IsRequired = true, Order = 20)]
+        public IDictionary<string, PoolEntry> Pools { get; set; }
 
-        [DataMember(Name = "cpu_template_path", EmitDefaultValue = true, IsRequired = true, Order = 30)]
-        public string CpuTemplate { get; set; }
+        [DataMember(Name = "cpu_profiles", EmitDefaultValue = true, IsRequired = true, Order = 30)]
+        public IDictionary<string, IList<CpuThreadEntry>> CpuProfiles { get; set; }
 
-        [DataMember(Name = "amd_template_path", EmitDefaultValue = true, IsRequired = true, Order = 40)]
-        public string AmdTemplate { get; set; }
+        [DataMember(Name = "nvidia_profiles", EmitDefaultValue = true, IsRequired = true, Order = 40)]
+        public IDictionary<string, IList<NvidiaThreadEntry>> NvidiaProfiles { get; set; }
 
-        [DataMember(Name = "pool_configuration", EmitDefaultValue = true, IsRequired = true, Order = 50)]
-        public PoolConfiguration PoolConfiguration { get; set; }
+        [DataMember(Name = "amd_profiles", EmitDefaultValue = true, IsRequired = true, Order = 50)]
+        public IDictionary<string, IList<AmdThreadEntry>> AmdProfiles { get; set; }
 
-        [DataMember(Name = "cpu_configuration", EmitDefaultValue = true, IsRequired = true, Order = 60)]
-        public CpuConfiguration CpuConfiguration { get; set; }
+        [DataMember(Name = "hardware", EmitDefaultValue = true, IsRequired = true, Order = 60)]
+        public IDictionary<string, HardwareEntry> Hardware { get; set; }
 
-        [DataMember(Name = "nvidia_configuration", EmitDefaultValue = true, IsRequired = true, Order = 70)]
-        public NvidiaConfiguration NvidiaConfiguration { get; set; }
+        [DataMember(Name = "workload_profiles", EmitDefaultValue = true, IsRequired = true, Order = 70)]
+        public IDictionary<string, IDictionary<string, string>> WorkloadProfiles { get; set; }
 
-        [DataMember(Name = "amd_configuration", EmitDefaultValue = true, IsRequired = true, Order = 80)]
-        public AmdConfiguration AmdConfiguration { get; set; }
-
-        [DataMember(Name = "instance_configuration", EmitDefaultValue = true, IsRequired = true, Order = 90)]
-        public InstanceConfiguration InstanceConfiguration { get; set; }
-
-        [DataMember(Name = "solution_configuration", EmitDefaultValue = true, IsRequired = true, Order = 100)]
-        public SolutionConfiguration SolutionConfiguration { get; set; }
-
-        public MasterConfigurationModel()
-        {
-            ConfigTemplate = "config.source.txt";
-            NvidiaTemplate = "nvidia.source.txt";
-            CpuTemplate = "cpu.source.txt";
-            AmdTemplate = "amd.source.txt";
-        }
+        [DataMember(Name = "solutions", EmitDefaultValue = true, IsRequired = true, Order = 80)]
+        public IDictionary<string, IList<SolutionEntry>> SolutionProfiles { get; set; }
     }
 }
