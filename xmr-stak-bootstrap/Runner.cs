@@ -120,13 +120,12 @@ namespace xmr_stak_bootstrap
         {
             var startInfo = new ProcessStartInfo(Path.GetFullPath("xmr-stak.exe"), arguments)
             {
-                WorkingDirectory = Environment.CurrentDirectory,
-                UseShellExecute = false
+                WorkingDirectory = Environment.CurrentDirectory
             };
 
             Console.WriteLine(@"Starting: xmr-stak.exe {0}", arguments);
 
-            ScheduleProcessKill(Process.Start(startInfo));
+            Process.Start(startInfo);
         }
 
         private string GetConfigurationArgument(MasterConfiguration configuration, List<PrioritizedPoolEntry> pools)
@@ -230,12 +229,6 @@ namespace xmr_stak_bootstrap
             {
                 Console.WriteLine(@"Cannot kill process {0}!", processId);
             }
-        }
-
-        private void ScheduleProcessKill(Process process)
-        {
-            var proc = process.Id; //capture
-            Finalizer.ScheduleFinalization(() => KillProcess(proc, process));
         }
     }
 }
