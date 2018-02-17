@@ -11,6 +11,9 @@ namespace XmrStakBootstrap.Core.Job.Miner
 {
     public class MinerRunnerMenuJob : IJob
     {
+        private const bool Continue = true;
+        private const bool Terminate = false;
+
         [Dependency]
         public IFinalizer Finalizer { get; set; }
 
@@ -57,50 +60,64 @@ namespace XmrStakBootstrap.Core.Job.Miner
                     .Create(() =>
                     {
                         Console.Clear();
-                        return true;
+                        return Continue;
                     })
-                    .AddConditionalOption(@"Start/restart miners", CanRun, () =>
-                    {
-                        Console.Clear();
-                        if (KillMiners() && RunConfigurationModel.MinerStartDelay > 0)
-                        {
-                            Console.WriteLine($@"Waiting {RunConfigurationModel.MinerStartDelay} second(s) before starting new miner(s).");
-                            Thread.Sleep(RunConfigurationModel.MinerStartDelay * 1000);
-                        }
-                        Finalizer.DoFinalize();
-                        Runner.Run(); //TODO: issue #1
-                        return false;
-                    })
-                    .AddEnabledOption(@"Change solution", () =>
-                    {
-                        SelectSolution(); //TODO: issue #1
-                        Console.Clear();
-                        return true;
-                    })
-                    .AddEnabledOption(@"Change workload", () =>
-                    {
-                        SelectWorkload(); //TODO: issue #1
-                        Console.Clear();
-                        return true;
-                    })
-                    .AddEnabledOption(@"Exit", () =>
-                    {
-                        Console.Clear();
-                        Finalizer.DoFinalize();
-                        Environment.Exit(0);
-                        return false;
-                    })
-                    .AddEnabledOption(@"Exit & terminate miners", () =>
-                    {
-                        Console.Clear();
-                        KillMiners();
-                        Finalizer.DoFinalize();
-                        Environment.Exit(0);
-                        return false;
-                    })
+                    .AddConditionalOption(@"Start/restart miners", CanRun, MenuOptionStartMiners)
+                    .AddEnabledOption(@"Change solution", MenuOptionChangeSolution)
+                    .AddEnabledOption(@"Change workload", MenuOptionChangeWorkload)
+                    .AddEnabledOption(@"Exit", MenuOptionExit)
+                    .AddEnabledOption(@"Exit & terminate miners", MenuOptionExitAndTerminateMiners)
                     .Execute();
             }
         }
+
+        #region Menu options
+
+        private bool MenuOptionStartMiners()
+        {
+            Console.Clear();
+            if (KillMiners() && RunConfigurationModel.MinerStartDelay > 0)
+            {
+                Console.WriteLine($@"Waiting {RunConfigurationModel.MinerStartDelay} second(s) before starting new miner(s).");
+                Thread.Sleep(RunConfigurationModel.MinerStartDelay * 1000);
+            }
+            Finalizer.DoFinalize();
+            Runner.Run(); //TODO: issue #1
+            return Terminate;
+        }
+
+        private bool MenuOptionChangeSolution()
+        {
+            SelectSolution(); //TODO: issue #1
+            Console.Clear();
+            return Continue;
+        }
+
+        private bool MenuOptionChangeWorkload()
+        {
+            SelectWorkload(); //TODO: issue #1
+            Console.Clear();
+            return Continue;
+        }
+
+        private bool MenuOptionExit()
+        {
+            Console.Clear();
+            Finalizer.DoFinalize();
+            Environment.Exit(0);
+            return Terminate;
+        }
+
+        private bool MenuOptionExitAndTerminateMiners()
+        {
+            Console.Clear();
+            KillMiners();
+            Finalizer.DoFinalize();
+            Environment.Exit(0);
+            return Terminate;
+        }
+
+        #endregion
 
         private static void ColorConsole(ConsoleColor color, Action action)
         {
