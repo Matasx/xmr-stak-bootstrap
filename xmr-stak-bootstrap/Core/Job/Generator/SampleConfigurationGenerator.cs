@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using XmrStakBootstrap.MasterConfiguration.Model;
 using XmrStakBootstrap.Properties;
 
-namespace XmrStakBootstrap.Core.Runner.Generator
+namespace XmrStakBootstrap.Core.Job.Generator
 {
     public class SampleConfigurationGenerator : ISampleConfigurationGenerator
     {

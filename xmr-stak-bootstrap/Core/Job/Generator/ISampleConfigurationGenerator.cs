@@ -1,4 +1,4 @@
-namespace XmrStakBootstrap.Core.Runner.Generator
+namespace XmrStakBootstrap.Core.Job.Generator
 {
     public interface ISampleConfigurationGenerator
     {

@@ -6,94 +6,24 @@ using System.Linq;
 using Newtonsoft.Json;
 using Unity.Attributes;
 using XmrStakBootstrap.Common;
-using XmrStakBootstrap.Common.Menu;
 using XmrStakBootstrap.MasterConfiguration.Model;
 using XmrStakBootstrap.RunConfiguration.Model;
 
-namespace XmrStakBootstrap.Core.Runner.Miner
+namespace XmrStakBootstrap.Core.Job.Miner
 {
-    public class MinerRunner : IRunner
+    public class MinerRunner : IMinerRunner
     {
         [Dependency]
         public IFinalizer Finalizer { get; set; }
 
         [Dependency]
-        public RunConfigurationModel RunConfigurationModel { get; set; }
-
-        [Dependency]
         public MasterConfigurationModel MasterConfigurationModel { get; set; }
 
-        private bool HasSolution
-            =>
-                MasterConfigurationModel.SolutionProfiles.ContainsKey(
-                    RunConfigurationModel.ActiveSolutionConfiguration ?? string.Empty);
-
-        private bool HasWorkload
-            =>
-                MasterConfigurationModel.WorkloadProfiles.ContainsKey(
-                    RunConfigurationModel.ActiveWorkloadConfiguration ?? string.Empty);
-
-        private bool CanRun => HasSolution && HasWorkload;
+        [Dependency]
+        public RunConfigurationModel RunConfigurationModel { get; set; }
 
         public void Run()
         {
-            if (MasterConfigurationModel == null)
-            {
-                Console.WriteLine(@"Master configuration file '{0}' was not loaded. Try running this program with argument --help.", RunConfigurationModel.MasterConfiguration);
-                return;
-            }
-
-            var @continue = true;
-            while (@continue)
-            {
-                Console.Clear();
-                Console.WriteLine(@"Active solution: {0}", HasSolution ? RunConfigurationModel.ActiveSolutionConfiguration : "<UNKNOWN>");
-                Console.WriteLine(@"Active workload: {0}", HasWorkload ? RunConfigurationModel.ActiveWorkloadConfiguration : "<UNKNOWN>");
-                Console.WriteLine();
-                Console.WriteLine(@"What would you like to do?");
-
-                @continue = MenuBuilder
-                    .Create(() => true)
-                    .AddConditionalOption(@"Start/restart miners", CanRun, () =>
-                    {
-                        DoRun();
-                        return false;
-                    })
-                    .AddEnabledOption(@"Change solution", () =>
-                    {
-                        SelectSolution();
-                        return true;
-                    })
-                    .AddEnabledOption(@"Change workload", () =>
-                    {
-                        SelectWorkload();
-                        return true;
-                    })
-                    .AddEnabledOption(@"Exit", () =>
-                    {
-                        Environment.Exit(0);
-                        return false;
-                    })
-                    .AddEnabledOption(@"Exit & terminate miners", () =>
-                    {
-                        KillMiners();
-                        Environment.Exit(0);
-                        return false;
-                    })
-                    .Execute();
-            }
-        }
-
-        private class UtilizedHardware
-        {
-            public HardwareEntry Hardware { get; set; }
-            public string Profile { get; set; }
-        }
-
-        private void DoRun()
-        {
-            KillMiners();
-
             var solution = MasterConfigurationModel.SolutionProfiles.GetValue(RunConfigurationModel.ActiveSolutionConfiguration);
             var workload = MasterConfigurationModel.WorkloadProfiles.GetValue(RunConfigurationModel.ActiveWorkloadConfiguration);
 
@@ -122,22 +52,6 @@ namespace XmrStakBootstrap.Core.Runner.Miner
 
                 RunMiner($"{configArgument} {cpuArgument} {amdArgument} {nvidiaArgument}");
             }
-        }
-
-        private void SelectSolution()
-        {
-            Console.WriteLine(@"Available solutions: ");
-            RunConfigurationModel.ActiveSolutionConfiguration =
-                MenuBuilder.CreateTextListMenu(MasterConfigurationModel.SolutionProfiles.Keys)
-                .Execute();
-        }
-
-        private void SelectWorkload()
-        {
-            Console.WriteLine(@"Available workloads: ");
-            RunConfigurationModel.ActiveWorkloadConfiguration =
-                MenuBuilder.CreateTextListMenu(MasterConfigurationModel.WorkloadProfiles.Keys)
-                .Execute();
         }
 
         private List<PrioritizedPoolEntry> GetOutputPools(IEnumerable<string> pools)
@@ -178,7 +92,7 @@ namespace XmrStakBootstrap.Core.Runner.Miner
             return $"--config \"{configPath}\"";
         }
 
-        private string GetCpuArgument(IList<UtilizedHardware> entry)
+        private string GetCpuArgument(ICollection<UtilizedHardware> entry)
         {
             if (entry.Count == 0)
             {
@@ -192,7 +106,7 @@ namespace XmrStakBootstrap.Core.Runner.Miner
             return $"--cpu \"{path}\"";
         }
 
-        private string GetAmdArgument(IList<UtilizedHardware> entry)
+        private string GetAmdArgument(ICollection<UtilizedHardware> entry)
         {
             if (entry.Count == 0)
             {
@@ -219,7 +133,7 @@ namespace XmrStakBootstrap.Core.Runner.Miner
             return $"--amd \"{path}\"";
         }
 
-        private string GetNvidiaArgument(IList<UtilizedHardware> entry)
+        private string GetNvidiaArgument(ICollection<UtilizedHardware> entry)
         {
             if (entry.Count == 0)
             {
@@ -274,31 +188,10 @@ namespace XmrStakBootstrap.Core.Runner.Miner
             });
         }
 
-        private static void KillMiners()
+        private class UtilizedHardware
         {
-            foreach (var process in Process.GetProcessesByName("xmr-stak"))
-            {
-                KillProcess(process);
-            }
-        }
-
-        private static void KillProcess(Process process)
-        {
-            KillProcess(process.Id, process);
-        }
-
-        private static void KillProcess(int processId, Process process)
-        {
-            try
-            {
-                process.Kill();
-                process.Dispose();
-                Console.WriteLine(@"Process {0} was killed.", processId);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine(@"Cannot kill process {0}!", processId);
-            }
+            public HardwareEntry Hardware { get; set; }
+            public string Profile { get; set; }
         }
     }
 }

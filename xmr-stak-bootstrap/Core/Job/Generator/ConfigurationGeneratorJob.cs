@@ -1,9 +1,9 @@
 using Unity.Attributes;
 using XmrStakBootstrap.RunConfiguration.Model;
 
-namespace XmrStakBootstrap.Core.Runner.Generator
+namespace XmrStakBootstrap.Core.Job.Generator
 {
-    public class ConfigurationGeneratorRunner : IRunner
+    public class ConfigurationGeneratorJob : IJob
     {
         [Dependency]
         public ISampleConfigurationGenerator SampleConfigurationGenerator { get; set; }
@@ -11,7 +11,7 @@ namespace XmrStakBootstrap.Core.Runner.Generator
         [Dependency]
         public RunConfigurationModel RunConfiguration { get; set; }
 
-        public void Run()
+        public void Execute()
         {
             SampleConfigurationGenerator.Generate(RunConfiguration.GenerateConfiguration);
         }

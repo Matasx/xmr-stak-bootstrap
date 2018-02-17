@@ -2,11 +2,11 @@
 using Unity;
 using Unity.Attributes;
 using Unity.Injection;
-using XmrStakBootstrap.Core.Runner.Generator;
-using XmrStakBootstrap.Core.Runner.Miner;
+using XmrStakBootstrap.Core.Job.Generator;
+using XmrStakBootstrap.Core.Job.Miner;
 using XmrStakBootstrap.RunConfiguration.Model;
 
-namespace XmrStakBootstrap.Core.Runner
+namespace XmrStakBootstrap.Core.Job
 {
     public class RunnerInjectionFactory : InjectionFactory
     {
@@ -14,7 +14,7 @@ namespace XmrStakBootstrap.Core.Runner
         {
         }
 
-        private static IRunner CreateRunner(IUnityContainer container)
+        private static IJob CreateRunner(IUnityContainer container)
         {
             return container.Resolve<RunnerFactory>().CreateRunner();
         }
@@ -29,14 +29,14 @@ namespace XmrStakBootstrap.Core.Runner
             [Dependency]
             public IUnityContainer UnityContainer { get; set; }
 
-            public IRunner CreateRunner()
+            public IJob CreateRunner()
             {
                 if (RunConfiguration.GenerateConfigurationOnly)
                 {
-                    return UnityContainer.Resolve<ConfigurationGeneratorRunner>();
+                    return UnityContainer.Resolve<ConfigurationGeneratorJob>();
                 }
 
-                return UnityContainer.Resolve<MinerRunner>();
+                return UnityContainer.Resolve<MinerRunnerMenuJob>();
             }
         }
     }
