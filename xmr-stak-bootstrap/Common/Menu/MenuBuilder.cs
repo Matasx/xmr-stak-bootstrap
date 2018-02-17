@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using XmrStakBootstrap.Common.Helper;
 
 namespace XmrStakBootstrap.Common.Menu
@@ -47,15 +48,23 @@ namespace XmrStakBootstrap.Common.Menu
 
         public T Execute()
         {
-            if (_options.Count == 0) return ExecuteDefault();
+            switch (_options.Count)
+            {
+                case 0:
+                    return ExecuteDefault();
 
-            RenderOptions();
-            var input = GetInput();
+                case 1:
+                    return ExecuteAction(_options.First().Action);
 
-            if (!IsInputValid(input)) return ExecuteDefault();
+                default:
+                    RenderOptions();
+                    var input = GetInput();
 
-            var option = _options[input - 1];
-            return option.IsEnabled ? ExecuteAction(option.Action) : ExecuteDefault();
+                    if (!IsInputValid(input)) return ExecuteDefault();
+
+                    var option = _options[input - 1];
+                    return option.IsEnabled ? ExecuteAction(option.Action) : ExecuteDefault();
+            }
         }
 
         private T ExecuteDefault()
@@ -73,12 +82,38 @@ namespace XmrStakBootstrap.Common.Menu
             return input >= 1 && input <= _options.Count;
         }
 
-        private static int GetInput()
+        private int GetInput()
         {
             Console.Write(@"Select: ");
+
+            var knownOptions = _options.Select((_, i) => (i + 1).ToString()).ToList();
+
+            ConsoleKeyInfo key;
+            var input = "";
             int index;
-            if (!int.TryParse(Console.ReadLine(), out index)) return -1;
-            return index;
+            do
+            {
+                key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+                {
+                    input = input.Substring(0, input.Length - 1);
+                    // ReSharper disable once LocalizableElement
+                    Console.Write("\b \b");
+                }
+                else if (char.IsNumber(key.KeyChar))
+                {
+                    input += key.KeyChar;
+                    Console.Write(key.KeyChar);
+                }
+
+                if (int.TryParse(input, out index) && IsInputValid(index))
+                {
+                    var stringInput = index.ToString();
+                    if (knownOptions.Count(x => x.StartsWith(stringInput)) == 1) return index;
+                }
+            }
+            while (key.Key != ConsoleKey.Enter);
+            return int.TryParse(input, out index) ? index : -1;
         }
 
         private void RenderOptions()

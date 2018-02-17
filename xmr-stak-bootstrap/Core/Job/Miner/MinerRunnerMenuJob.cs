@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Unity.Attributes;
+using XmrStakBootstrap.Common.Helper;
 using XmrStakBootstrap.Common.Menu;
 using XmrStakBootstrap.MasterConfiguration.Model;
 using XmrStakBootstrap.RunConfiguration.Model;
@@ -44,8 +45,10 @@ namespace XmrStakBootstrap.Core.Job.Miner
             var @continue = true;
             while (@continue)
             {
-                Console.WriteLine(@"Active solution: {0}", HasSolution ? RunConfigurationModel.ActiveSolutionConfiguration : "<UNKNOWN>");
-                Console.WriteLine(@"Active workload: {0}", HasWorkload ? RunConfigurationModel.ActiveWorkloadConfiguration : "<UNKNOWN>");
+                Console.Write(@"Active solution: ");
+                ColorConsole(HasSolution ? ConsoleColor.White : ConsoleColor.DarkGray, () => Console.WriteLine(HasSolution ? RunConfigurationModel.ActiveSolutionConfiguration : "<UNKNOWN>"));
+                Console.Write(@"Active workload: ");
+                ColorConsole(HasWorkload ? ConsoleColor.White : ConsoleColor.DarkGray, () => Console.WriteLine(HasWorkload ? RunConfigurationModel.ActiveWorkloadConfiguration : "<UNKNOWN>"));
                 Console.WriteLine();
                 Console.WriteLine(@"What would you like to do?");
 
@@ -92,6 +95,11 @@ namespace XmrStakBootstrap.Core.Job.Miner
                     })
                     .Execute();
             }
+        }
+
+        private static void ColorConsole(ConsoleColor color, Action action)
+        {
+            using (ConsoleColorClosure.ForegroundColor(color)) action();
         }
 
         private void SelectSolution()
