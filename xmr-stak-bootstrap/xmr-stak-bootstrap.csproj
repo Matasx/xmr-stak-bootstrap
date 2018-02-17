@@ -85,6 +85,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Runner\Generator\ConfigurationGeneratorRunner.cs" />
+    <Compile Include="Common\Helper\Closure.cs" />
+    <Compile Include="Common\Helper\ConsoleColorClosure.cs" />
+    <Compile Include="Common\Menu\IMenuBuilder.cs" />
+    <Compile Include="Common\Menu\MenuBuilder.cs" />
+    <Compile Include="Common\Menu\MenuBuilderExtensions.cs" />
     <Compile Include="MasterConfiguration\IMasterConfigurationParser.cs" />
     <Compile Include="Core\Runner\IRunnerContext.cs" />
     <Compile Include="MasterConfiguration\MasterConfigurationParser.cs" />

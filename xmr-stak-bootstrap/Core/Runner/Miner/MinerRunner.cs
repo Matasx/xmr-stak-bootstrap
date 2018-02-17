@@ -6,6 +6,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Unity.Attributes;
 using XmrStakBootstrap.Common;
+using XmrStakBootstrap.Common.Menu;
 using XmrStakBootstrap.MasterConfiguration.Model;
 using XmrStakBootstrap.RunConfiguration.Model;
 
@@ -42,57 +43,45 @@ namespace XmrStakBootstrap.Core.Runner.Miner
                 return;
             }
 
-            //TODO: refactor
-            while (true)
+            var @continue = true;
+            while (@continue)
             {
                 Console.Clear();
                 Console.WriteLine(@"Active solution: {0}", HasSolution ? RunConfigurationModel.ActiveSolutionConfiguration : "<UNKNOWN>");
                 Console.WriteLine(@"Active workload: {0}", HasWorkload ? RunConfigurationModel.ActiveWorkloadConfiguration : "<UNKNOWN>");
                 Console.WriteLine();
                 Console.WriteLine(@"What would you like to do?");
-                if (CanRun) Console.WriteLine(@"0. Run/restart miners");
-                Console.WriteLine(@"1. Exit");
-                Console.WriteLine(@"2. Exit & terminate miners");
-                Console.WriteLine(@"3. Change solution");
-                Console.WriteLine(@"4. Change workload");
-                Console.WriteLine();
 
-                Console.Write(@"Select: ");
-                int index;
-                if (!int.TryParse(Console.ReadLine(), out index) || index < (CanRun ? 0 : 1) || index > 5) continue;
-
-                Console.Clear();
-                switch ((UserAction)index)
-                {
-                    case UserAction.Run:
+                @continue = MenuBuilder
+                    .Create(() => true)
+                    .AddConditionalOption(@"Start/restart miners", CanRun, () =>
+                    {
                         DoRun();
-                        return;
-                    case UserAction.Exit:
+                        return false;
+                    })
+                    .AddEnabledOption(@"Change solution", () =>
+                    {
+                        SelectSolution();
+                        return true;
+                    })
+                    .AddEnabledOption(@"Change workload", () =>
+                    {
+                        SelectWorkload();
+                        return true;
+                    })
+                    .AddEnabledOption(@"Exit", () =>
+                    {
                         Environment.Exit(0);
-                        break;
-                    case UserAction.ExitTerminate:
+                        return false;
+                    })
+                    .AddEnabledOption(@"Exit & terminate miners", () =>
+                    {
                         KillMiners();
                         Environment.Exit(0);
-                        break;
-                    case UserAction.ChangeSolution:
-                        SelectSolution();
-                        break;
-                    case UserAction.ChangeWorkload:
-                        SelectWorkload();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                        return false;
+                    })
+                    .Execute();
             }
-        }
-
-        private enum UserAction
-        {
-            Run,
-            Exit,
-            ExitTerminate,
-            ChangeSolution,
-            ChangeWorkload
         }
 
         private class UtilizedHardware
@@ -138,37 +127,17 @@ namespace XmrStakBootstrap.Core.Runner.Miner
         private void SelectSolution()
         {
             Console.WriteLine(@"Available solutions: ");
-            var keys = MasterConfigurationModel.SolutionProfiles.Keys.ToList();
-            var i = 0;
-            foreach (var key in keys)
-            {
-                Console.WriteLine(@"{0,3}: {1}", i, key);
-                i++;
-            }
-            Console.Write(@"Select: ");
-            int index;
-            if (int.TryParse(Console.ReadLine(), out index) && index >= 0 && index < keys.Count)
-            {
-                RunConfigurationModel.ActiveSolutionConfiguration = keys[index];
-            }
+            RunConfigurationModel.ActiveSolutionConfiguration =
+                MenuBuilder.CreateTextListMenu(MasterConfigurationModel.SolutionProfiles.Keys)
+                .Execute();
         }
 
         private void SelectWorkload()
         {
             Console.WriteLine(@"Available workloads: ");
-            var keys = MasterConfigurationModel.WorkloadProfiles.Keys.ToList();
-            var i = 0;
-            foreach (var key in keys)
-            {
-                Console.WriteLine(@"{0,3}: {1}", i, key);
-                i++;
-            }
-            Console.Write(@"Select: ");
-            int index;
-            if (int.TryParse(Console.ReadLine(), out index) && index >= 0 && index < keys.Count)
-            {
-                RunConfigurationModel.ActiveWorkloadConfiguration = keys[index];
-            }
+            RunConfigurationModel.ActiveWorkloadConfiguration =
+                MenuBuilder.CreateTextListMenu(MasterConfigurationModel.WorkloadProfiles.Keys)
+                .Execute();
         }
 
         private List<PrioritizedPoolEntry> GetOutputPools(IEnumerable<string> pools)
