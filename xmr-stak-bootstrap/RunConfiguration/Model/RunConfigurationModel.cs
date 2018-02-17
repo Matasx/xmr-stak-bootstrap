@@ -13,6 +13,9 @@ namespace XmrStakBootstrap.RunConfiguration.Model
         [Option('w', "workload", HelpText = "Name of workload to run", SetName = "mine")]
         public string ActiveWorkloadConfiguration { get; set; }
 
+        [Option('d', "delay", HelpText = "Number of seconds to wait before terminating old miners and starting new ones", SetName = "mine", DefaultValue = 10)]
+        public int MinerStartDelay { get; set; }
+
         [Option('n', "continuous", HelpText = "Do not close bootstrapper after launching miners", SetName = "mine")]
         public bool ContinuousMode { get; set; }
 

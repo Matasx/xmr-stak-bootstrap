@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading;
 using Unity.Attributes;
 using XmrStakBootstrap.Common.Helper;
 using XmrStakBootstrap.Common.Menu;
@@ -61,7 +62,11 @@ namespace XmrStakBootstrap.Core.Job.Miner
                     .AddConditionalOption(@"Start/restart miners", CanRun, () =>
                     {
                         Console.Clear();
-                        KillMiners(); //TODO: issue #6
+                        if (KillMiners() && RunConfigurationModel.MinerStartDelay > 0)
+                        {
+                            Console.WriteLine($@"Waiting {RunConfigurationModel.MinerStartDelay} second(s) before starting new miner(s).");
+                            Thread.Sleep(RunConfigurationModel.MinerStartDelay * 1000);
+                        }
                         Finalizer.DoFinalize();
                         Runner.Run(); //TODO: issue #1
                         return false;
@@ -120,12 +125,15 @@ namespace XmrStakBootstrap.Core.Job.Miner
                     .Execute();
         }
 
-        private static void KillMiners()
+        private static bool KillMiners()
         {
+            var any = false;
             foreach (var process in Process.GetProcessesByName("xmr-stak"))
             {
+                any = true;
                 KillProcess(process);
             }
+            return any;
         }
 
         private static void KillProcess(Process process)
