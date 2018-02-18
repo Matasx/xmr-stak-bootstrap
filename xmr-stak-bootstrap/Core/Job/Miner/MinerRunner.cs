@@ -17,21 +17,18 @@ namespace XmrStakBootstrap.Core.Job.Miner
         public IFinalizer Finalizer { get; set; }
 
         [Dependency]
-        public MasterConfigurationModel MasterConfigurationModel { get; set; }
-
-        [Dependency]
         public RunConfigurationModel RunConfigurationModel { get; set; }
 
-        public void Run()
+        public void Run(MasterConfigurationModel configuration)
         {
-            var solution = MasterConfigurationModel.SolutionProfiles.GetValue(RunConfigurationModel.ActiveSolutionConfiguration);
-            var workload = MasterConfigurationModel.WorkloadProfiles.GetValue(RunConfigurationModel.ActiveWorkloadConfiguration);
+            var solution = configuration.SolutionProfiles.GetValue(RunConfigurationModel.ActiveSolutionConfiguration);
+            var workload = configuration.WorkloadProfiles.GetValue(RunConfigurationModel.ActiveWorkloadConfiguration);
 
             var i = 0;
             foreach (var instances in solution)
             {
                 i++;
-                var outputPools = GetOutputPools(instances.Pools);
+                var outputPools = GetOutputPools(configuration.Pools, instances.Pools);
 
                 if (outputPools.Count == 0)
                 {
@@ -39,25 +36,25 @@ namespace XmrStakBootstrap.Core.Job.Miner
                     continue;
                 }
 
-                var configArgument = GetConfigurationArgument(outputPools);
+                var configArgument = GetConfigurationArgument(configuration.PathsConfiguration.ConfigTemplate, outputPools);
                 var utilizedHardware = instances.Hardware.Select(x => new UtilizedHardware
                 {
-                    Hardware = MasterConfigurationModel.Hardware.GetValue(x),
+                    Hardware = configuration.Hardware.GetValue(x),
                     Profile = workload.GetValue(x)
                 }).ToList();
 
-                var cpuArgument = GetCpuArgument(utilizedHardware.Where(x => x.Hardware.Type == "cpu").ToList());
-                var amdArgument = GetAmdArgument(utilizedHardware.Where(x => x.Hardware.Type == "amd").ToList());
-                var nvidiaArgument = GetNvidiaArgument(utilizedHardware.Where(x => x.Hardware.Type == "nvidia").ToList());
+                var cpuArgument = GetCpuArgument(configuration.PathsConfiguration.CpuTemplate, configuration.CpuProfiles, utilizedHardware.Where(x => x.Hardware.Type == "cpu").ToList());
+                var amdArgument = GetAmdArgument(configuration.PathsConfiguration.AmdTemplate, configuration.AmdProfiles, utilizedHardware.Where(x => x.Hardware.Type == "amd").ToList());
+                var nvidiaArgument = GetNvidiaArgument(configuration.PathsConfiguration.NvidiaTemplate, configuration.NvidiaProfiles, utilizedHardware.Where(x => x.Hardware.Type == "nvidia").ToList());
 
                 RunMiner($"{configArgument} {cpuArgument} {amdArgument} {nvidiaArgument}");
             }
         }
 
-        private List<PrioritizedPoolEntry> GetOutputPools(IEnumerable<string> pools)
+        private static List<PrioritizedPoolEntry> GetOutputPools(IDictionary<string, PoolEntry> poolConfiguration, IEnumerable<string> pools)
         {
             return pools
-                .Select(x => MasterConfigurationModel.Pools.GetValue(x))
+                .Select(poolConfiguration.GetValue)
                 .Reverse()
                 .Select((x, i) => new PrioritizedPoolEntry
                 {
@@ -84,29 +81,29 @@ namespace XmrStakBootstrap.Core.Job.Miner
             Process.Start(startInfo);
         }
 
-        private string GetConfigurationArgument(IReadOnlyCollection<PrioritizedPoolEntry> pools)
+        private string GetConfigurationArgument(string configurationTemplatePath, IReadOnlyCollection<PrioritizedPoolEntry> pools)
         {
-            var configPath = CreateTemporaryConfiguration(MasterConfigurationModel.PathsConfiguration.ConfigTemplate, "config", "%POOLS%", pools);
+            var configPath = CreateTemporaryConfiguration(configurationTemplatePath, "config", "%POOLS%", pools);
             ScheduleFileDelete(configPath);
 
             return $"--config \"{configPath}\"";
         }
 
-        private string GetCpuArgument(ICollection<UtilizedHardware> entry)
+        private string GetCpuArgument(string cpuTemplatePath, IDictionary<string, IList<CpuThreadEntry>> cpuConfiguration, ICollection<UtilizedHardware> entry)
         {
             if (entry.Count == 0)
             {
                 return "--noCPU";
             }
 
-            var cpuProfile = entry.SelectMany(x => MasterConfigurationModel.CpuProfiles.GetValue(x.Profile)).ToList();
-            var path = CreateTemporaryConfiguration(MasterConfigurationModel.PathsConfiguration.CpuTemplate, "cpu", "%THREADS%", cpuProfile);
+            var cpuProfile = entry.SelectMany(x => cpuConfiguration.GetValue(x.Profile)).ToList();
+            var path = CreateTemporaryConfiguration(cpuTemplatePath, "cpu", "%THREADS%", cpuProfile);
             ScheduleFileDelete(path);
 
             return $"--cpu \"{path}\"";
         }
 
-        private string GetAmdArgument(ICollection<UtilizedHardware> entry)
+        private string GetAmdArgument(string amdTemplatePath, IDictionary<string, IList<AmdThreadEntry>> amdConfiguration, ICollection<UtilizedHardware> entry)
         {
             if (entry.Count == 0)
             {
@@ -116,7 +113,7 @@ namespace XmrStakBootstrap.Core.Job.Miner
             var amdProfile = entry
                 .SelectMany(
                     x =>
-                        MasterConfigurationModel.AmdProfiles.GetValue(x.Profile)
+                        amdConfiguration.GetValue(x.Profile)
                             .Select(profile => new IndexedAmdThreadEntry
                             {
                                 Index = x.Hardware.Index,
@@ -127,13 +124,13 @@ namespace XmrStakBootstrap.Core.Job.Miner
                             }))
                 .ToList();
 
-            var path = CreateTemporaryConfiguration(MasterConfigurationModel.PathsConfiguration.AmdTemplate, "amd", "%THREADS%", amdProfile);
+            var path = CreateTemporaryConfiguration(amdTemplatePath, "amd", "%THREADS%", amdProfile);
             ScheduleFileDelete(path);
 
             return $"--amd \"{path}\"";
         }
 
-        private string GetNvidiaArgument(ICollection<UtilizedHardware> entry)
+        private string GetNvidiaArgument(string nvidiaTemplatePath, IDictionary<string, IList<NvidiaThreadEntry>> nvidiaConfiguration, ICollection<UtilizedHardware> entry)
         {
             if (entry.Count == 0)
             {
@@ -143,7 +140,7 @@ namespace XmrStakBootstrap.Core.Job.Miner
             var nvidiaProfile = entry
                 .SelectMany(
                     x =>
-                        MasterConfigurationModel.NvidiaProfiles.GetValue(x.Profile)
+                        nvidiaConfiguration.GetValue(x.Profile)
                             .Select(profile => new IndexedNvidiaThreadEntry
                             {
                                 Index = x.Hardware.Index,
@@ -156,7 +153,7 @@ namespace XmrStakBootstrap.Core.Job.Miner
                             }))
                 .ToList();
 
-            var path = CreateTemporaryConfiguration(MasterConfigurationModel.PathsConfiguration.NvidiaTemplate, "nvidia", "%THREADS%", nvidiaProfile);
+            var path = CreateTemporaryConfiguration(nvidiaTemplatePath, "nvidia", "%THREADS%", nvidiaProfile);
             ScheduleFileDelete(path);
 
             return $"--nvidia \"{path}\"";

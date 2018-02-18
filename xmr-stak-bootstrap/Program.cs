@@ -45,7 +45,7 @@ namespace XmrStakBootstrap
         public IFinalizer Finalizer { get; set; }
 
         [Dependency]
-        public IUnityContainer UnityContainer { get; set; }
+        public IJob Job { get; set; }
 
         public void Run()
         {
@@ -58,12 +58,7 @@ namespace XmrStakBootstrap
             {
                 while (true)
                 {
-                    using (var container = UnityContainer.CreateChildContainer())
-                    {
-                        ProgramBootstrapper.RegisterRunnerContainer(container);
-                        var context = container.Resolve<IJob>();
-                        context.Execute();
-                    }
+                    Job.Execute();
 
                     if (ConfigurationModel.ContinuousMode) continue;
 

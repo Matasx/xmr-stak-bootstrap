@@ -84,36 +84,43 @@ namespace XmrStakBootstrap.Common.Menu
 
         private int GetInput()
         {
-            Console.Write(@"Select: ");
-
-            var knownOptions = _options.Select((_, i) => (i + 1).ToString()).ToList();
-
-            ConsoleKeyInfo key;
-            var input = "";
-            int index;
-            do
+            try
             {
-                key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Backspace && input.Length > 0)
-                {
-                    input = input.Substring(0, input.Length - 1);
-                    // ReSharper disable once LocalizableElement
-                    Console.Write("\b \b");
-                }
-                else if (char.IsNumber(key.KeyChar))
-                {
-                    input += key.KeyChar;
-                    Console.Write(key.KeyChar);
-                }
+                Console.Write(@"Select: ");
 
-                if (int.TryParse(input, out index) && IsInputValid(index))
+                var knownOptions = _options.Select((_, i) => (i + 1).ToString()).ToList();
+
+                ConsoleKeyInfo key;
+                var input = "";
+                int index;
+                do
                 {
-                    var stringInput = index.ToString();
-                    if (knownOptions.Count(x => x.StartsWith(stringInput)) == 1) return index;
+                    key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+                    {
+                        input = input.Substring(0, input.Length - 1);
+                        // ReSharper disable once LocalizableElement
+                        Console.Write("\b \b");
+                    }
+                    else if (char.IsNumber(key.KeyChar))
+                    {
+                        input += key.KeyChar;
+                        Console.Write(key.KeyChar);
+                    }
+
+                    if (int.TryParse(input, out index) && IsInputValid(index))
+                    {
+                        var stringInput = index.ToString();
+                        if (knownOptions.Count(x => x.StartsWith(stringInput)) == 1) return index;
+                    }
                 }
+                while (key.Key != ConsoleKey.Enter);
+                return int.TryParse(input, out index) ? index : -1;
             }
-            while (key.Key != ConsoleKey.Enter);
-            return int.TryParse(input, out index) ? index : -1;
+            finally
+            {
+                Console.WriteLine();
+            }
         }
 
         private void RenderOptions()

@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Newtonsoft.Json;
+using Unity;
 using Unity.Attributes;
 using XmrStakBootstrap.Common.Helper;
 using XmrStakBootstrap.Common.Menu;
@@ -14,41 +16,39 @@ namespace XmrStakBootstrap.Core.Job.Miner
         private const bool Continue = true;
         private const bool Terminate = false;
 
+        private MasterConfigurationModel _masterConfigurationModel;
+
+        [Dependency]
+        public IUnityContainer UnityContainer { get; set; }
+
         [Dependency]
         public IFinalizer Finalizer { get; set; }
 
         [Dependency]
-        public RunConfigurationModel RunConfigurationModel { get; set; }
-
-        [Dependency]
-        public MasterConfigurationModel MasterConfigurationModel { get; set; }
-
-        [Dependency]
         public IMinerRunner Runner { get; set; }
+
+        [Dependency]
+        public RunConfigurationModel RunConfigurationModel { get; set; }
 
         private bool HasSolution
             =>
-                MasterConfigurationModel.SolutionProfiles.ContainsKey(
+                GetMasterConfigurationModel().SolutionProfiles.ContainsKey(
                     RunConfigurationModel.ActiveSolutionConfiguration ?? string.Empty);
 
         private bool HasWorkload
             =>
-                MasterConfigurationModel.WorkloadProfiles.ContainsKey(
+                GetMasterConfigurationModel().WorkloadProfiles.ContainsKey(
                     RunConfigurationModel.ActiveWorkloadConfiguration ?? string.Empty);
 
         private bool CanRun => HasSolution && HasWorkload;
 
         public void Execute()
         {
-            if (MasterConfigurationModel == null)
-            {
-                Console.WriteLine(@"Master configuration file '{0}' was not loaded. Try running this program with argument --help.", RunConfigurationModel.MasterConfiguration);
-                return;
-            }
-
             var @continue = true;
             while (@continue)
             {
+                GetMasterConfigurationModel();
+
                 Console.Write(@"Active solution: ");
                 ColorConsole(HasSolution ? ConsoleColor.White : ConsoleColor.DarkGray, () => Console.WriteLine(HasSolution ? RunConfigurationModel.ActiveSolutionConfiguration : "<UNKNOWN>"));
                 Console.Write(@"Active workload: ");
@@ -63,6 +63,7 @@ namespace XmrStakBootstrap.Core.Job.Miner
                         return Continue;
                     })
                     .AddConditionalOption(@"Start/restart miners", CanRun, MenuOptionStartMiners)
+                    .AddEnabledOption(@"Reload configuration", MenuOptionReloadConfiguration)
                     .AddEnabledOption(@"Change solution", MenuOptionChangeSolution)
                     .AddEnabledOption(@"Change workload", MenuOptionChangeWorkload)
                     .AddEnabledOption(@"Exit", MenuOptionExit)
@@ -82,20 +83,29 @@ namespace XmrStakBootstrap.Core.Job.Miner
                 Thread.Sleep(RunConfigurationModel.MinerStartDelay * 1000);
             }
             Finalizer.DoFinalize();
-            Runner.Run(); //TODO: issue #1
+            Runner.Run(_masterConfigurationModel);
             return Terminate;
+        }
+
+        private bool MenuOptionReloadConfiguration()
+        {
+            Console.Clear();
+            InvalidateConfiguration();
+            return Continue;
         }
 
         private bool MenuOptionChangeSolution()
         {
-            SelectSolution(); //TODO: issue #1
+            InvalidateConfiguration();
+            SelectSolution();
             Console.Clear();
             return Continue;
         }
 
         private bool MenuOptionChangeWorkload()
         {
-            SelectWorkload(); //TODO: issue #1
+            InvalidateConfiguration();
+            SelectWorkload();
             Console.Clear();
             return Continue;
         }
@@ -124,21 +134,69 @@ namespace XmrStakBootstrap.Core.Job.Miner
             using (ConsoleColorClosure.ForegroundColor(color)) action();
         }
 
+        private MasterConfigurationModel GetMasterConfigurationModel()
+        {
+            return _masterConfigurationModel ?? (_masterConfigurationModel = LoadConfiguration());
+        }
+
+        private void InvalidateConfiguration()
+        {
+            _masterConfigurationModel = null;
+        }
+
+        private MasterConfigurationModel LoadConfiguration()
+        {
+            while (true)
+            {
+                try
+                {
+                    var config = UnityContainer.Resolve<MasterConfigurationModel>();
+                    if (config == null)
+                    {
+                        Console.WriteLine(@"Master configuration file '{0}' was not loaded. Try running this program with argument --help.", RunConfigurationModel.MasterConfiguration);
+                        WaitForAnyKeyToReloadConfiguration();
+                        continue;
+                    }
+                    Console.WriteLine(@"Configuration was loaded.");
+                    return config;
+                }
+                catch (Exception e)
+                {
+                    using (ConsoleColorClosure.ForegroundColor(ConsoleColor.Red))
+                    {
+                        Console.WriteLine(@"An error occured while loading master configuration:");
+                        Console.WriteLine((e.InnerException as JsonReaderException)?.Message ?? e.Message);
+                    }
+                    WaitForAnyKeyToReloadConfiguration();
+                }
+            }
+        }
+
+        private static void WaitForAnyKeyToReloadConfiguration()
+        {
+            Console.WriteLine();
+            Console.Write(@"Press any key to reload configuration.");
+            Console.ReadKey(true);
+            Console.Clear();
+        }
+
         private void SelectSolution()
         {
+            var configuration = GetMasterConfigurationModel();
             Console.WriteLine();
             Console.WriteLine(@"Available solutions: ");
             RunConfigurationModel.ActiveSolutionConfiguration =
-                MenuBuilder.CreateTextListMenu(MasterConfigurationModel.SolutionProfiles.Keys)
+                MenuBuilder.CreateTextListMenu(configuration.SolutionProfiles.Keys)
                     .Execute();
         }
 
         private void SelectWorkload()
         {
+            var configuration = GetMasterConfigurationModel();
             Console.WriteLine();
             Console.WriteLine(@"Available workloads: ");
             RunConfigurationModel.ActiveWorkloadConfiguration =
-                MenuBuilder.CreateTextListMenu(MasterConfigurationModel.WorkloadProfiles.Keys)
+                MenuBuilder.CreateTextListMenu(configuration.WorkloadProfiles.Keys)
                     .Execute();
         }
 
