@@ -130,4 +130,7 @@
   <data name="nvidia_source" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\MasterConfiguration\Templates\nvidia.source.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;windows-1250</value>
   </data>
+  <data name="pools_source" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pools_source.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;windows-1250</value>
+  </data>
 </root>

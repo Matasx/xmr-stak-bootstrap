@@ -11,6 +11,9 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
         [DataMember(Name = "wallet_address", EmitDefaultValue = true, IsRequired = true, Order = 20)]
         public string WalletAddress { get; set; }
 
+        [DataMember(Name = "rig_id", EmitDefaultValue = true, IsRequired = true, Order = 25)]
+        public string RigId { get; set; }
+
         [DataMember(Name = "pool_password", EmitDefaultValue = true, IsRequired = true, Order = 30)]
         public string PoolPassword { get; set; }
 
@@ -23,6 +26,9 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
         [DataMember(Name = "tls_fingerprint", EmitDefaultValue = true, IsRequired = true, Order = 60)]
         public string TlsFingerprint { get; set; }
 
+        [DataMember(Name = "currency", EmitDefaultValue = false, IsRequired = true, Order = 70)]
+        public string Currency { get; set; }
+
         public PoolEntry()
         {
             PoolAddress = "pool.address.tld:1234";
@@ -31,6 +37,8 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
             UseNiceHash = false;
             UseTls = false;
             WalletAddress = "your_wallet_address";
+            RigId = string.Empty;
+            Currency = "electroneum";
         }
     }
 }

@@ -17,6 +17,7 @@ namespace XmrStakBootstrap.Core.Job.Generator
             WriteAllText(configuration.PathsConfiguration.CpuTemplate, Resources.cpu_source);
             WriteAllText(configuration.PathsConfiguration.NvidiaTemplate, Resources.nvidia_source);
             WriteAllText(configuration.PathsConfiguration.AmdTemplate, Resources.amd_source);
+            WriteAllText(configuration.PathsConfiguration.PoolsTemplate, Resources.pools_source);
         }
 
         private static void WriteAllText(string path, string content)

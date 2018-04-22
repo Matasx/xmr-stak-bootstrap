@@ -19,7 +19,7 @@ namespace XmrStakBootstrap.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -78,12 +78,12 @@ namespace XmrStakBootstrap.Properties {
         /// <summary>
         ///   Looks up a localized string similar to 
         ////*
-        /// * pool_address    - Pool address should be in the form &quot;pool.supportxmr.com:3333&quot;. Only stratum pools are supported.
-        /// * wallet_address  - Your wallet, or pool login.
-        /// * pool_password   - Can be empty in most cases or &quot;x&quot;.
-        /// * use_nicehash    - Limit the nonce to 3 bytes as required by nicehash.
-        /// * use_tls         - This option will make us connect using Transport Layer Security.
-        /// * tls_fingerprint - Server&apos;s SHA256 fingerprint. If this string is non-empty then we will check the server&apos;s cert agai [rest of string was truncated]&quot;;.
+        /// * Network timeouts.
+        /// * Because of the way this client is written it doesn&apos;t need to constantly talk (keep-alive) to the server to make 
+        /// * sure it is there. We detect a buggy / overloaded server by the call timeout. The default values will be ok for 
+        /// * nearly all cases. If they aren&apos;t the pool has most likely overload issues. Low call timeout values are preferable -
+        /// * long timeouts mean that we waste hashes on potentially stale jobs. Connection report will tell you how long the
+        /// * server usual [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string config_source {
             get {
@@ -120,6 +120,23 @@ namespace XmrStakBootstrap.Properties {
         internal static string nvidia_source {
             get {
                 return ResourceManager.GetString("nvidia_source", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ////*
+        /// * pool_address    - Pool address should be in the form &quot;pool.supportxmr.com:3333&quot;. Only stratum pools are supported.
+        /// * wallet_address  - Your wallet, or pool login.
+        /// * rig_id          - Rig identifier for pool-side statistics (needs pool support).
+        /// * pool_password   - Can be empty in most cases or &quot;x&quot;.
+        /// * use_nicehash    - Limit the nonce to 3 bytes as required by nicehash.
+        /// * use_tls         - This option will make us connect using Transport Layer Security.
+        /// * tls_fingerprint - Server&apos;s SHA25 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string pools_source {
+            get {
+                return ResourceManager.GetString("pools_source", resourceCulture);
             }
         }
     }

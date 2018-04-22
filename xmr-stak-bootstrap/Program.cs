@@ -49,7 +49,7 @@ namespace XmrStakBootstrap
 
         public void Run()
         {
-            if (ConfigurationModel == null) return;
+            if (!ConfigurationModel.IsValid) return;
 
             _handler = ConsoleEventCallback;
             SetConsoleCtrlHandler(_handler, true);
@@ -61,6 +61,7 @@ namespace XmrStakBootstrap
                     Job.Execute();
 
                     if (ConfigurationModel.ContinuousMode) continue;
+                    if (ConfigurationModel.GenerateConfigurationOnly) break;
 
                     Console.WriteLine(@"Waiting 30 seconds before finalization.");
                     Thread.Sleep(30000);

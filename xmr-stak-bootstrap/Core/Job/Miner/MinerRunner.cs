@@ -36,7 +36,13 @@ namespace XmrStakBootstrap.Core.Job.Miner
                     continue;
                 }
 
-                var configArgument = GetConfigurationArgument(configuration.PathsConfiguration.ConfigTemplate, outputPools);
+                var currency = GetPoolCurrency(outputPools);
+                if (string.IsNullOrWhiteSpace(currency))
+                {
+                    Console.WriteLine(@"Instance {0}.{1} does not contain valid currency. Make sure currency for all pools is set to the same value.", RunConfigurationModel.ActiveSolutionConfiguration, i);
+                    continue;
+                }
+
                 var utilizedHardware = instances.Hardware.Select(x => new UtilizedHardware
                 {
                     Hardware = configuration.Hardware.GetValue(x),
@@ -47,7 +53,10 @@ namespace XmrStakBootstrap.Core.Job.Miner
                 var amdArgument = GetAmdArgument(configuration.PathsConfiguration.AmdTemplate, configuration.AmdProfiles, utilizedHardware.Where(x => x.Hardware.Type == "amd").ToList());
                 var nvidiaArgument = GetNvidiaArgument(configuration.PathsConfiguration.NvidiaTemplate, configuration.NvidiaProfiles, utilizedHardware.Where(x => x.Hardware.Type == "nvidia").ToList());
 
-                RunMiner($"{configArgument} {cpuArgument} {amdArgument} {nvidiaArgument}");
+                var configArgument = GetConfigurationArgument(configuration.PathsConfiguration.ConfigTemplate);
+                var poolsArgument = GetPoolsArgument(configuration.PathsConfiguration.PoolsTemplate, outputPools, currency);
+
+                RunMiner($"{configArgument} {poolsArgument} {cpuArgument} {amdArgument} {nvidiaArgument}");
             }
         }
 
@@ -64,9 +73,17 @@ namespace XmrStakBootstrap.Core.Job.Miner
                     TlsFingerprint = x.TlsFingerprint,
                     WalletAddress = x.WalletAddress,
                     UseNiceHash = x.UseNiceHash,
-                    UseTls = x.UseTls
+                    UseTls = x.UseTls,
+                    RigId = x.RigId,
+                    Currency = x.Currency
                 })
                 .ToList();
+        }
+
+        private static string GetPoolCurrency(IEnumerable<PrioritizedPoolEntry> pools)
+        {
+            var currencies = pools.Select(x => (x.Currency ?? string.Empty).ToLower()).Distinct().ToList();
+            return currencies.Count != 1 ? null : currencies.First();
         }
 
         private static void RunMiner(string arguments)
@@ -81,12 +98,27 @@ namespace XmrStakBootstrap.Core.Job.Miner
             Process.Start(startInfo);
         }
 
-        private string GetConfigurationArgument(string configurationTemplatePath, IReadOnlyCollection<PrioritizedPoolEntry> pools)
+        private string GetConfigurationArgument(string configurationTemplatePath)
         {
-            var configPath = CreateTemporaryConfiguration(configurationTemplatePath, "config", "%POOLS%", pools);
+            var configPath = CreateTemporaryConfiguration(configurationTemplatePath, "config");
             ScheduleFileDelete(configPath);
 
             return $"--config \"{configPath}\"";
+        }
+
+        private string GetPoolsArgument(string poolsTemplatePath, IReadOnlyCollection<PrioritizedPoolEntry> pools, string currency)
+        {
+            foreach (var prioritizedPoolEntry in pools)
+            {
+                prioritizedPoolEntry.Currency = null;
+            }
+
+            var configPath = CreateTemporaryConfiguration(poolsTemplatePath, "pools",
+                new VariableReplacement("%POOLS%", pools), 
+                new VariableReplacement("%CURRENCY%", currency));
+            ScheduleFileDelete(configPath);
+
+            return $"--poolconf \"{configPath}\"";
         }
 
         private string GetCpuArgument(string cpuTemplatePath, IDictionary<string, IList<CpuThreadEntry>> cpuConfiguration, ICollection<UtilizedHardware> entry)
@@ -97,7 +129,7 @@ namespace XmrStakBootstrap.Core.Job.Miner
             }
 
             var cpuProfile = entry.SelectMany(x => cpuConfiguration.GetValue(x.Profile)).ToList();
-            var path = CreateTemporaryConfiguration(cpuTemplatePath, "cpu", "%THREADS%", cpuProfile);
+            var path = CreateTemporaryConfiguration(cpuTemplatePath, "cpu", new VariableReplacement("%THREADS%", cpuProfile));
             ScheduleFileDelete(path);
 
             return $"--cpu \"{path}\"";
@@ -124,7 +156,7 @@ namespace XmrStakBootstrap.Core.Job.Miner
                             }))
                 .ToList();
 
-            var path = CreateTemporaryConfiguration(amdTemplatePath, "amd", "%THREADS%", amdProfile);
+            var path = CreateTemporaryConfiguration(amdTemplatePath, "amd", new VariableReplacement("%THREADS%", amdProfile));
             ScheduleFileDelete(path);
 
             return $"--amd \"{path}\"";
@@ -153,19 +185,38 @@ namespace XmrStakBootstrap.Core.Job.Miner
                             }))
                 .ToList();
 
-            var path = CreateTemporaryConfiguration(nvidiaTemplatePath, "nvidia", "%THREADS%", nvidiaProfile);
+            var path = CreateTemporaryConfiguration(nvidiaTemplatePath, "nvidia", new VariableReplacement("%THREADS%", nvidiaProfile));
             ScheduleFileDelete(path);
 
             return $"--nvidia \"{path}\"";
         }
 
-        private static string CreateTemporaryConfiguration(string templatePath, string type, string variable, object value)
+        private static string CreateTemporaryConfiguration(string templatePath, string type, params VariableReplacement[] variables)
         {
-            var configTemplateContent = File.ReadAllText(templatePath);
-            var configContent = configTemplateContent.Replace(variable, JsonConvert.SerializeObject(value, Formatting.Indented));
+            var content = File.ReadAllText(templatePath);
+            if (variables != null)
+            {
+                foreach(var variable in variables)
+                {
+                    content = content.Replace(variable.Variable, JsonConvert.SerializeObject(variable.Value, Formatting.Indented));
+                }
+            }
+
             var configPath = $"{Guid.NewGuid()}.{type}.txt";
-            File.WriteAllText(configPath, configContent);
+            File.WriteAllText(configPath, content);
             return configPath;
+        }
+
+        private class VariableReplacement
+        {
+            public string Variable { get; set; }
+            public object Value { get; set; }
+
+            public VariableReplacement(string variable, object value)
+            {
+                Variable = variable;
+                Value = value;
+            }
         }
 
         private void ScheduleFileDelete(string file)

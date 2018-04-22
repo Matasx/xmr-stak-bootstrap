@@ -39,7 +39,7 @@ namespace XmrStakBootstrap
         {
             var parser = unityContainer.Resolve<IRunConfigurationParser>();
             var config = parser.Parse(args);
-            return config.Errors.Any() ? null : config.Value;
+            return config.Errors.Any() ? RunConfigurationModel.InvalidModel : config.Value;
         }
     }
 }

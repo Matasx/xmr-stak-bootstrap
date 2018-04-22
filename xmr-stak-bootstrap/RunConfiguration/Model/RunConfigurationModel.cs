@@ -23,5 +23,9 @@ namespace XmrStakBootstrap.RunConfiguration.Model
         public string GenerateConfiguration { get; set; }
 
         public bool GenerateConfigurationOnly => !string.IsNullOrWhiteSpace(GenerateConfiguration);
+
+        public bool IsValid { get; set; } = true;
+
+        public static RunConfigurationModel InvalidModel = new RunConfigurationModel { IsValid = false };
     }
 }

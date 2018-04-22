@@ -19,12 +19,20 @@ namespace XmrStakBootstrap.MasterConfiguration.Model
         [DataMember(Name = "strided_index", EmitDefaultValue = true, IsRequired = true, Order = 50)]
         public bool StridedIndex { get; set; }
 
+        [DataMember(Name = "mem_chunk", EmitDefaultValue = true, IsRequired = true, Order = 60)]
+        public int MemChunk { get; set; }
+
+        [DataMember(Name = "comp_mode", EmitDefaultValue = true, IsRequired = true, Order = 70)]
+        public bool CompMode { get; set; }
+
         public AmdThreadEntry()
         {
             Intensity = 1000;
             Worksize = 8;
             AffineToCpu = false;
             StridedIndex = true;
+            MemChunk = 2;
+            CompMode = true;
         }
     }
 }
