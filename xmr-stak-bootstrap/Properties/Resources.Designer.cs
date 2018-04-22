@@ -19,7 +19,7 @@ namespace XmrStakBootstrap.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -63,9 +63,9 @@ namespace XmrStakBootstrap.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /*
         /// * GPU configuration. You should play around with intensity and worksize as the fastest settings will vary.
-        /// *      index    - GPU index number usually starts from 0
-        /// *  intensity    - Number of parallel GPU threads (nothing to do with CPU threads)
-        /// *   worksize    - Number of local GPU threads (nothing to do with CPU threads)
+        /// * index         - GPU index number usually starts from 0
+        /// * intensity     - Number of parallel GPU threads (nothing to do with CPU threads)
+        /// * worksize      - Number of local GPU threads (nothing to do with CPU threads)
         /// * affine_to_cpu - This will affine the thread to a CPU. This can make a GPU miner play along nicer with a CPU miner.
         /// * strided_index - switch memory pattern used for the sc [rest of string was truncated]&quot;;.
         /// </summary>
